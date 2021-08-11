@@ -1,0 +1,76 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: pyclient
+spec:
+  servers:
+    - hosts:
+        - "*"
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
+  selector:
+    istio: ingressgateway
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: pyclient
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - pyclient
+  http:
+  - match:
+    - uri:
+        exact: /home
+    route:
+    - destination:
+        port:
+          number: 80
+        host: pyclient
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pyclient
+  labels:
+    app: pyclient
+spec:
+  ports:
+  - name: pyclient
+    port: 80
+    targetPort: 5000
+  selector:
+    app: pyclient
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyclient
+  labels:
+    app: pyclient
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pyclient
+  template:
+    metadata:
+      labels:
+        app: pyclient
+    spec:
+      containers:
+      - image: pyclient:latest
+        imagePullPolicy: IfNotPresent
+        name: pyclient
+        ports:
+        - name: pyclient
+          containerPort: 5000
+      restartPolicy: Always
+---
