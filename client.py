@@ -9,7 +9,7 @@ def get():
   sys.stderr.write("\n----------calling pyserver----------\n")
   sys.stdout.flush()
   r = requests.get('http://pyserver/index')
-  return r.text
+  return r.text, r.status_code
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', threaded = True)

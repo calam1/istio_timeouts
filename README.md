@@ -75,5 +75,36 @@ curl -v localhost/index
 * Connection #0 to host localhost left intact
 upstream request timeout* Closing connection 0
 
+# now let's reset everything to where there are no delays and/or timeouts
+> kubectl apply -f deployment/deployment_client.yml -n timeouts
+
+# now on the server lets return a 504 instead of doing a 2 second delay, remember that we did not apply a timeout on the client
+> kubectl apply -f deployment/virtualservice_timeout_504.yml -n timeouts
+
+> curl  -vv http://localhost/home
+* TCP_NODELAY set
+* Connected to localhost (::1) port 80 (#0)
+> GET /home HTTP/1.1
+> Host: localhost
+> User-Agent: curl/7.64.1
+> Accept: */*
+>
+< HTTP/1.1 504 Gateway Timeout
+< content-type: text/html; charset=utf-8
+< content-length: 18
+< server: istio-envoy
+< date: Thu, 12 Aug 2021 18:52:45 GMT
+< x-envoy-upstream-service-time: 11
+<
+* Connection #0 to host localhost left intact
+fault filter abort* Closing connection 0
+
+
+## Metric for failing
+# in prometheus I queried using
+rate(istio_requests_total{kubernetes_namespace="timeouts", app="pyclient", response_code="504"}[2m])
 
 ```
+Prometheus chart for monitoring timeouts
+![](images/504.png)
+

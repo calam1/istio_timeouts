@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: pyserver
+spec:
+  hosts:
+    - pyserver.timeouts.svc.cluster.local
+    - pyserver
+    # - "*"
+  gateways:
+    - mesh
+    - pyserver
+  http:
+  - match:
+    - uri:
+        exact: /index
+    fault:
+      abort:
+        httpStatus: 504
+        percentage:
+          value: 100
+    route:
+    - destination:
+        port:
+          number: 80
+        host: pyserver
