@@ -77,6 +77,7 @@ upstream request timeout* Closing connection 0
 
 # now let's reset everything to where there are no delays and/or timeouts
 > kubectl apply -f deployment/deployment_client.yml -n timeouts
+> kubectl apply -f deployment/deployment_server.yml -n timeouts
 
 # now on the server lets return a 504 instead of doing a 2 second delay, remember that we did not apply a timeout on the client
 > kubectl apply -f deployment/virtualservice_timeout_504.yml -n timeouts
